@@ -3,7 +3,7 @@
     Plugin Name: BuddyPress Xprofile Custom Fields Type
     Plugin URI: http://donmik.com/en/buddypress-xprofile-custom-fields-type/
     Description: BuddyPress installation required!! This plugin add custom field types to BuddyPress Xprofile extension. Field types are: Birthdate, Email, Url, Datepicker, ...
-    Version: 2.1.6
+    Version: 2.2.0
     Author: donmik
     Author URI: http://donmik.com
 */
@@ -22,7 +22,7 @@ if (!class_exists('Bxcft_Plugin'))
 
         public function __construct ()
         {
-            $this->version = "2.1.5";
+            $this->version = "2.2.0";
 
             /** Main hooks **/
             add_action( 'plugins_loaded', array($this, 'bxcft_update') );
@@ -83,7 +83,6 @@ if (!class_exists('Bxcft_Plugin'))
         public function admin_init()
         {
             if (is_admin() && get_option('bxcft_activated') == 1) {
-                delete_option('bxcft_activated');
                 // Check if BuddyPress 2.0 is installed.
                 $version_bp = 0;
                 if (function_exists('is_plugin_active') && is_plugin_active('buddypress/bp-loader.php')) {
@@ -97,6 +96,7 @@ if (!class_exists('Bxcft_Plugin'))
                     $notices = get_option('bxcft_notices');
                     $notices[] = __('BuddyPress Xprofile Custom Fields Type plugin needs <b>BuddyPress 2.0</b>, please install or upgrade BuddyPress.', 'bxcft');
                     update_option('bxcft_notices', $notices);
+                    delete_option('bxcft_activated');
                 }
 
                 // Enqueue javascript.
@@ -457,7 +457,7 @@ if (!class_exists('Bxcft_Plugin'))
             $field_id = $data->field_id;
             $field = new BP_XProfile_Field($field_id);
 
-            if ($field->type == 'image' || $field->type == 'file')
+            if ($field->type == 'image' || $field->type == 'file' && isset($_FILES['field_'.$field_id]))
             {
                 $uploads = wp_upload_dir();
                 $filesize = round($_FILES['field_'.$field_id]['size'] / (1024 * 1024), 2);
@@ -600,7 +600,6 @@ if (!class_exists('Bxcft_Plugin'))
                 case 'color':
                     $field_type = 'textbox';
                     break;
-					
                 case 'decimal_number':
                     $field_type = 'number';
                     break;
@@ -626,7 +625,6 @@ if (!class_exists('Bxcft_Plugin'))
                     load_textdomain( "bxcft", $mofile );
                 }
             }
-			
             if (!get_option('bxcft_activated')) {
                 add_option('bxcft_activated', 1);
             }
